@@ -128,6 +128,10 @@ function runRace(raceID) {
 	return new Promise(resolve => {
 	// TODO - use Javascript's built in setInterval method to get race info every 500ms
 
+	const raceInterval = setInterval((raceID) => {
+		fetch()
+	})
+
 	/* 
 		TODO - if the race info status property is "in-progress", update the leaderboard by calling:
 
@@ -401,6 +405,13 @@ function createRace(player_id, track_id) {
 
 function getRace(id) {
 	// GET request to `${SERVER}/api/races/${id}`
+	try {
+		return fetch(`${SERVER}/api/races/${id}`)
+		.then((cars) => cars.json())
+		.then((json) => json)
+	} catch (error) {
+		console.log(`Got error getting race:`, error)
+	}
 }
 
 function startRace(id) {
