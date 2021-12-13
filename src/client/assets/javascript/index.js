@@ -75,7 +75,7 @@ async function delay(ms) {
 // This async function controls the flow of the race, add the logic and error handling
 async function handleCreateRace() {
 	// render starting UI
-	//enderAt('#race', renderRaceStartView({name: 'test'}))
+	renderAt('#race', renderRaceStartView({name: 'test'}))
 
 	// TODO - Get player_id and track_id from the store
 	const player_id = store.player_id
@@ -87,6 +87,10 @@ async function handleCreateRace() {
 	// TODO - update the store with the race id
 	race.then((race) => {
 		store.race_id = race.ID
+	})
+	.then(() => {
+		runCountdown()
+		.then((result) => console.log('countdown done: ', result))
 	})
 
 	// The race has been created, now start the countdown
@@ -127,8 +131,18 @@ async function runCountdown() {
 		return new Promise(resolve => {
 			// TODO - use Javascript's built in setInterval method to count down once per second
 
-			// run this DOM manipulation to decrement the countdown for the user
-			document.getElementById('big-numbers').innerHTML = --timer
+			const countdown = setInterval(() => {
+				if(timer === 0) {
+					clearInterval(countdown)
+					resolve(true)
+				}
+				else {
+					// run this DOM manipulation to decrement the countdown for the user
+					document.getElementById('big-numbers').innerHTML = --timer
+					console.log(timer)
+				}
+				
+			}, 1000)
 
 			// TODO - if the countdown is done, clear the interval, resolve the promise, and return
 
