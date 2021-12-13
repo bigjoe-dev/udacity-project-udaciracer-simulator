@@ -86,11 +86,34 @@ async function handleCreateRace() {
 
 	// TODO - update the store with the race id
 	race.then((race) => {
-		store.race_id = race.ID
+		let raceId = race.ID
+		// Fix bug with API where sending race ID 1 to API breaks it.
+		if (raceId === 2 ) {
+			createRace(player_id, track_id)
+			.then((race) => {
+				raceId = race.ID
+				store.race_id = raceId
+			})
+		}
+		else {
+			store.race_id = raceId
+		}
 	})
 	.then(() => {
+		// TODO - call the async function runCountdown
 		runCountdown()
-		.then((result) => console.log('countdown done: ', result))
+		.then((result) => {
+			if (result) {
+				startRace(store.race_id - 1)
+				.then((race) => console.log(race))
+			}
+			else {
+				throw Error("Error during countdown")
+			}
+		})
+	})
+	.catch((err) => {
+		console.log(err)
 	})
 
 	// The race has been created, now start the countdown
@@ -134,6 +157,7 @@ async function runCountdown() {
 			const countdown = setInterval(() => {
 				if(timer === 0) {
 					clearInterval(countdown)
+					// TODO - if the countdown is done, clear the interval, resolve the promise, and return
 					resolve(true)
 				}
 				else {
@@ -143,9 +167,6 @@ async function runCountdown() {
 				}
 				
 			}, 1000)
-
-			// TODO - if the countdown is done, clear the interval, resolve the promise, and return
-
 		})
 	} catch(error) {
 		console.log(error);
@@ -387,7 +408,9 @@ function startRace(id) {
 		method: 'POST',
 		...defaultFetchOpts(),
 	})
-	.then(res => res.json())
+	.then(res => {
+		console.log(res)
+	})
 	.catch(err => console.log("Problem with getRace request::", err))
 }
 
