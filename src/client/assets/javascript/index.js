@@ -91,12 +91,12 @@ async function handleCreateRace() {
 		if (raceId === 2 ) {
 			createRace(player_id, track_id)
 			.then((race) => {
-				raceId = race.ID - 1
+				raceId = race.ID - 1 // FIX API
 				store.race_id = raceId
 			})
 		}
 		else {
-			store.race_id = raceId - 1
+			store.race_id = raceId - 1 // FIX API
 		}
 	})
 	.then(() => {
@@ -104,7 +104,7 @@ async function handleCreateRace() {
 		runCountdown()
 		.then((result) => {
 			if (result) {
-				startRace(store.race_id - 1)
+				startRace(store.race_id)
 				.then(() => runRace(store.race_id))
 			}
 			else {
@@ -129,12 +129,18 @@ function runRace(raceID) {
 	// TODO - use Javascript's built in setInterval method to get race info every 500ms
 
 	const raceInterval = setInterval(() => {
-		getRace(raceID)
-		.then((res) => {
-			renderAt('#leaderBoard', raceProgress(res.positions))
-		})
-	}, 500)
-
+			getRace(raceID)
+			.then((res) => {
+				if(res.status === "in-progress") {
+					renderAt('#leaderBoard', raceProgress(res.positions))
+				}
+				else if(res.status === "finished") {
+					clearInterval(raceInterval) // to stop the interval from repeating
+					renderAt('#race', resultsView(res.positions)) // to render the results view
+					resolve(res) // resolve the promise
+				}
+			})
+		}, 500)
 	/* 
 		TODO - if the race info status property is "in-progress", update the leaderboard by calling:
 
@@ -193,7 +199,7 @@ function handleSelectPodRacer(target) {
 	target.classList.add('selected')
 
 	// TODO - save the selected racer to the store
-	store.player_id = target.id
+	store.player_id = parseInt(target.id)
 }
 
 function handleSelectTrack(target) {
@@ -215,6 +221,7 @@ function handleSelectTrack(target) {
 
 function handleAccelerate() {
 	console.log("accelerate button clicked")
+	accelerate(store.race_id)
 	// TODO - Invoke the API call to accelerate
 }
 
@@ -242,10 +249,10 @@ function renderRacerCard(racer) {
 
 	return `
 		<li class="card podracer" id="${id}">
-			<h3>${driver_name}</h3>
-			<p>${top_speed}</p>
-			<p>${acceleration}</p>
-			<p>${handling}</p>
+			<h3>Name: ${driver_name}</h3>
+			<p>Top Speed: ${top_speed}</p>
+			<p>Acceleration: ${acceleration}</p>
+			<p>Handling: ${handling}</p>
 		</li>
 	`
 }
@@ -318,7 +325,7 @@ function resultsView(positions) {
 }
 
 function raceProgress(positions) {
-	console.log(positions)
+	console.log('these are the positions: ', positions)
 	let userPlayer = positions.find(e => e.id === store.player_id)
 	userPlayer.driver_name += " (you)"
 
@@ -433,4 +440,9 @@ function accelerate(id) {
 	// POST request to `${SERVER}/api/races/${id}/accelerate`
 	// options parameter provided as defaultFetchOpts
 	// no body or datatype needed for this request
+	return fetch(`${SERVER}/api/races/${id}/accelerate`, {
+		method: 'POST',
+		...defaultFetchOpts(),
+	})
+	.catch(err => console.log("Problem with accelerate request::", err))
 }
