@@ -91,12 +91,12 @@ async function handleCreateRace() {
 		if (raceId === 2 ) {
 			createRace(player_id, track_id)
 			.then((race) => {
-				raceId = race.ID
+				raceId = race.ID - 1
 				store.race_id = raceId
 			})
 		}
 		else {
-			store.race_id = raceId
+			store.race_id = raceId - 1
 		}
 	})
 	.then(() => {
@@ -105,7 +105,7 @@ async function handleCreateRace() {
 		.then((result) => {
 			if (result) {
 				startRace(store.race_id - 1)
-				.then((race) => console.log(race))
+				.then(() => runRace(store.race_id))
 			}
 			else {
 				throw Error("Error during countdown")
@@ -128,9 +128,12 @@ function runRace(raceID) {
 	return new Promise(resolve => {
 	// TODO - use Javascript's built in setInterval method to get race info every 500ms
 
-	const raceInterval = setInterval((raceID) => {
-		fetch()
-	})
+	const raceInterval = setInterval(() => {
+		getRace(raceID)
+		.then((res) => {
+			renderAt('#leaderBoard', raceProgress(res.positions))
+		})
+	}, 500)
 
 	/* 
 		TODO - if the race info status property is "in-progress", update the leaderboard by calling:
@@ -315,6 +318,7 @@ function resultsView(positions) {
 }
 
 function raceProgress(positions) {
+	console.log(positions)
 	let userPlayer = positions.find(e => e.id === store.player_id)
 	userPlayer.driver_name += " (you)"
 
