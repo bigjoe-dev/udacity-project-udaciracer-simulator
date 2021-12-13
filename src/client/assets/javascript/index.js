@@ -180,7 +180,6 @@ async function runCountdown() {
 				else {
 					// run this DOM manipulation to decrement the countdown for the user
 					document.getElementById('big-numbers').innerHTML = --timer
-					console.log(timer)
 				}
 				
 			}, 1000)
@@ -295,7 +294,6 @@ function renderCountdown(count) {
 }
 
 function renderRaceStartView(track, racers) {
-	console.log(track)
 	return `
 		<header>
 			<h1>Race: ${track}</h1>
@@ -330,7 +328,6 @@ function resultsView(positions) {
 }
 
 function raceProgress(positions) {
-	console.log('these are the positions: ', positions)
 	let userPlayer = positions.find(e => e.id === store.player_id)
 	userPlayer.driver_name += " (you)"
 
