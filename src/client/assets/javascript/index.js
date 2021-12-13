@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 async function onPageLoad() {
 	try {
-		getTracks()
+		await getTracks()
 			.then(tracks => {
 				const html = renderTrackCards(tracks)
 				renderAt('#tracks', html)
@@ -182,7 +182,7 @@ function renderRacerCars(racers) {
 
 	return `
 		<ul id="racers">
-			${reuslts}
+			${results}
 		</ul>
 	`
 }
@@ -319,8 +319,15 @@ function defaultFetchOpts() {
 
 // TODO - Make a fetch call (with error handling!) to each of the following API endpoints 
 
-function getTracks() {
+async function getTracks() {
 	// GET request to `${SERVER}/api/tracks`
+	try {
+		return await fetch(`${SERVER}/api/tracks`)
+		.then((tracks) => tracks.json())
+		.then((json) => json)
+	} catch (error) {
+		console.log(`Got error getting tracks:`, error)
+	}
 }
 
 function getRacers() {
