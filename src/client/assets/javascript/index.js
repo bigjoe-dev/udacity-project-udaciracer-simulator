@@ -158,6 +158,7 @@ function runRace(raceID) {
 		reslove(res) // resolve the promise
 	*/
 	})
+	.catch((err) => console.log('Error while running race:', err))
 	// remember to add error handling for the Promise
 }
 
